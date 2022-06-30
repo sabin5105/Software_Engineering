@@ -6,16 +6,30 @@ import cleanse
 def similar_foods(df, name, n):
     """비슷한 음식 n개 찾기"""
     pref = df.loc[name]
-    foods = recommend_foods(df, pref, n + 1)
+    foods, _ = recommend_foods(df, pref, n + 1, [])
     return foods[1:]
 
 
-def recommend_foods(df, pref, n):
+def recommend_foods(df, pref, n, recents):
     """선호에 맞는 음식 n개 추천하기"""
+    # 최근에 추천한 음식은 제외하기
+    mask = ~df.index.isin(recents)
+    df = df[mask]
+
+    # 추천할 음식 고르기
     diffs_df = df - pref
     distances = (diffs_df**2).sum(axis=1)**0.5
     sorted_distances = distances.sort_values()
-    return sorted_distances[:n]
+    new_recomms = sorted_distances[:n]
+
+    # 최근 추천한 음식 목록 갱신
+    new_recents = update_recents(recents, new_recomms.index.tolist(), 6)
+
+    return new_recomms, new_recents
+
+
+def update_recents(recents, new_recomms, n):
+    return (recents + new_recomms)[-n:]
 
 
 def load_data():
