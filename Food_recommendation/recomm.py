@@ -2,26 +2,39 @@ import re
 
 import engine
 
+RECENT_FILENAME = 'recomm.log'
+
 
 def main():
     print("Welcome to the Food Recommendation System!")
     df = engine.load_data()
+    recents = load_recents()
 
-    # TODO: read from file
-    recents = []
     while True:
         try:
             raw_input = input("Enter your preferences (hot oily sweet): ")
             prefs = parse_raw_input(raw_input)
             foods, recents = engine.recommend_foods(df, prefs, 3, recents)
-            print(describe_recomm(foods))
+            save_recents(recents)
+            description = describe_recomm(foods)
+            print(description)
         except ValueError as e:
             print(e)
-        except EOFError:
+        except EOFError:  # EOF: End-of-file
             print("Bye!")
             break
 
         print()
+
+
+def load_recents():
+    with open(RECENT_FILENAME, encoding='utf-8') as f:
+        return f.read().splitlines()
+
+
+def save_recents(recents):
+    with open(RECENT_FILENAME, 'w', encoding='utf-8') as f:
+        f.writelines(r + '\n' for r in recents)
 
 
 def parse_raw_input(raw_input):
