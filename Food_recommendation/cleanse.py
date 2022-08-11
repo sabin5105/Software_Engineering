@@ -43,4 +43,3 @@ def check_foodnames(dfs):
 
 def make_dummy(values, names):
     return pd.DataFrame(values, index=names)
-
